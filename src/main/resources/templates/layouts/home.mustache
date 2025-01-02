@@ -1,0 +1,271 @@
+{{>layouts/header}}
+<style>
+    #startBtn {
+        width: 50px;
+        height: 50px;
+        border: none;
+        background: url('/images/recording_start.jpg') no-repeat center;
+        background-size: contain;
+        cursor: pointer;
+    }
+
+    #stopBtn {
+        width: 50px;
+        height: 50px;
+        border: none;
+        background: url('/images/unable_stop.png') no-repeat center;
+        background-size: contain;
+        cursor: pointer;
+    }
+</style>
+<div id="back_ground">
+    <!-- 버튼들 (텍스트 전송, 오디오 전송) -->
+    <div style="display: flex; justify-content: flex-start; width: 100%; max-width: 500px; padding: 0; margin: 0;">
+        <button id="text" type="button" class="btn btn-success"
+                style="background-color: white; color: black; border-bottom: 2px solid white; border-bottom-left-radius: 0; border-bottom-right-radius: 0; width: 20%;">텍스트</button>
+        <button id="audio" type="button" class="btn btn-success" style="border-bottom-left-radius: 0; border-bottom-right-radius: 0; width: 20%;">오디오</button>
+    </div>
+
+    <!-- 텍스트 전송 폼 -->
+    <form id="txt_input" class="container" action="/em/info" method="post"
+          style="background-color: white; padding: 30px; width: 100%; max-width: 500px; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; border-top-left-radius: 0;border-top-right-radius: 8px; position: relative; box-sizing: border-box; margin: 0; display: flex; flex-direction: column; justify-content: flex-start; height: 60vh; overflow-y: auto;">
+
+        <div class="mb-3" style="display: flex; justify-content: space-between; align-items: center;">
+            <label class="form-label" style="margin-bottom: 0;font-weight: bold">현재 위치</label>
+            <button type="button" class="icon-button btn btn-outline-primary" id="location-btn" style="margin-left: auto;">
+                <img id="location-btm-img" src="images/location_img.png" alt="location" style="width: 20px; height: 20px;">
+            </button>
+        </div>
+        <div class="mb-3" style="display: flex; align-items: center; justify-content: space-between;">
+            <label class="form-label">위도</label>
+            <input type="text" class="form-control" name="lat" placeholder="위도를 입력하세요" style="flex: 1; margin-left: 10px;">
+        </div>
+
+        <!-- 경도 입력 -->
+        <div class="mb-3" style="display: flex; align-items: center; justify-content: space-between;">
+            <label class="form-label" style="margin-right: 10px;">경도</label>
+            <input type="text" class="form-control" name="lon" placeholder="경도를 입력하세요" style="flex: 1;">
+        </div>
+
+        <!-- 상태 입력 -->
+        <div class="mb-3">
+            <label class="form-label" style="font-weight: bold;">상태</label>
+            <textarea class="form-control" name="status" rows="3" placeholder="현재 무슨상태이죠?"></textarea>
+        </div>
+
+        <!-- 제출 버튼 -->
+        <div id="submit1" style="padding-top: 10px;">
+            <button type="submit" class="btn btn-primary"
+                    style="width: 100%; padding: 10px;">병원 탐색</button>
+        </div>
+    </form>
+
+    <!-- 오디오 전송 폼 -->
+    <form id="audio_input" class="container" action="/em/upload" method="post" enctype="multipart/form-data"
+          style="background-color: white; padding: 30px; width: 100%; max-width: 500px; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; border-top-left-radius: 0;border-top-right-radius: 8px; height: 60vh; position: relative; overflow-y: auto; box-sizing: border-box; margin: 0; display: none; flex-direction: column; justify-content: flex-start;">
+
+        <div class="mb-3" style="display: flex; justify-content: space-between; align-items: center;">
+            <label class="form-label" style="margin-bottom: 0;font-weight: bold">현재 위치</label>
+            <button type="button" class="icon-button btn btn-outline-primary" id="location-btn2" style="margin-left: auto;">
+                <img id="location-btm-img" src="images/location_img.png" alt="location" style="width: 20px; height: 20px;">
+            </button>
+        </div>
+
+        <div class="mb-3" style="display: flex; align-items: center; justify-content: space-between;">
+            <label class="form-label">위도</label>
+            <input type="text" class="form-control" id="latitude2"  name="lat2" placeholder="위도를 입력하세요" style="flex: 1; margin-left: 10px;">
+        </div>
+
+        <!-- 경도 입력 -->
+        <div class="mb-3" style="display: flex; align-items: center; justify-content: space-between;">
+            <label class="form-label" style="margin-right: 10px;">경도</label>
+            <input type="text" class="form-control" id="longitude2"  name="lon2" placeholder="경도를 입력하세요" style="flex: 1;">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" style="font-weight: bold;">음성 파일</label>
+            <label class="form-label" for="audioFile" id="audioFileLabel" style="display:none;">녹음 완료</label>
+            <input id="audioFile" type="file" class="form-control" name="file" accept="audio/mp3" style="display:none;">
+        </div>
+        <div class="mb-3" style="height: 10%">
+            <button id="startBtn" type="button"></button>
+            <button id="stopBtn"  type="button" disabled></button>
+        </div>
+        <div style="margin-top: 48px; padding-top: 10px;">
+            <button id="submit2" type="submit" class="btn btn-primary"
+                    style="width: 100%; padding: 10px;">병원 탐색</button>
+        </div>
+    </form>
+</div>
+<script>
+    let mediaRecorder;
+    let audioChunks = [];
+    const txtBtn = document.getElementById("text");
+    const audioBtn = document.getElementById("audio");
+    const txtForm = document.getElementById("txt_input");
+    const audioForm = document.getElementById("audio_input");
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const latitudeInput = document.getElementById("latitude2");
+    const longitudeInput = document.getElementById("longitude2");
+    const audioFileInput = document.getElementById("audioFile");
+    const audioFileLabel = document.getElementById("audioFileLabel");
+    const buttons = document.querySelectorAll("#submit1, #submit2");
+
+
+    buttons.forEach((button) => {
+        button.addEventListener("click", (event) => {
+            const loading = document.getElementById("loading");
+            loading.style.display = "flex";
+        });
+    });
+    txtBtn.addEventListener("click", () => {
+        audioForm.style.display = "none"; // audioForm 숨김
+        txtForm.style.display = "block"; // txtForm 표시
+        txtBtn.style.backgroundColor = "white";
+        txtBtn.style.color = "black";
+        txtBtn.style.borderBottom = "2px solid white";
+        audioBtn.style.backgroundColor = "";
+        audioBtn.style.color = "";
+
+        audioBtn.style.borderBottom = "2px solid transparent";
+    });
+
+    audioBtn.addEventListener("click", () => {
+        txtForm.style.display = "none"; // txtForm 숨김
+        audioForm.style.display = "block"; // audioForm 표시
+
+        audioBtn.style.backgroundColor = "white";
+        audioBtn.style.color = "black";
+        audioBtn.style.borderBottom = "2px solid white";
+        txtBtn.style.backgroundColor = "";
+        txtBtn.style.color = "";
+        txtBtn.style.borderBottom = "2px solid transparent";
+    });
+
+    document.getElementById('location-btn').addEventListener('click', function (event) {
+        event.preventDefault(); // 기본 동작 방지
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+
+                        // 입력 필드에 위치 값 삽입
+                        document.querySelector('input[name="lat"]').value = latitude;
+                        document.querySelector('input[name="lon"]').value = longitude;
+                        document.querySelector('input[name="lat2"]').value = latitude;
+                        document.querySelector('input[name="lon2"]').value = longitude;
+
+                    },
+                    (error) => {
+                        switch (error.code) {
+                            case error.PERMISSION_DENIED:
+                                alert("위치 정보 사용이 거부되었습니다.");
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                alert("위치 정보를 사용할 수 없습니다.");
+                                break;
+                            case error.TIMEOUT:
+                                alert("위치 정보를 가져오는 데 시간이 초과되었습니다.");
+                                break;
+                            default:
+                                alert("알 수 없는 오류가 발생했습니다.");
+                        }
+                        console.error(error);
+                    }
+            );
+        } else {
+            alert("이 브라우저는 위치 정보를 지원하지 않습니다.");
+        }
+    });
+    document.getElementById('location-btn2').addEventListener('click', function (event) {
+        event.preventDefault(); // 기본 동작 방지
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+
+                        // 입력 필드에 위치 값 삽입
+                        document.querySelector('input[name="lat"]').value = latitude;
+                        document.querySelector('input[name="lon"]').value = longitude;
+                        document.querySelector('input[name="lat2"]').value = latitude;
+                        document.querySelector('input[name="lon2"]').value = longitude;
+
+                    },
+                    (error) => {
+                        switch (error.code) {
+                            case error.PERMISSION_DENIED:
+                                alert("위치 정보 사용이 거부되었습니다.");
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                alert("위치 정보를 사용할 수 없습니다.");
+                                break;
+                            case error.TIMEOUT:
+                                alert("위치 정보를 가져오는 데 시간이 초과되었습니다.");
+                                break;
+                            default:
+                                alert("알 수 없는 오류가 발생했습니다.");
+                        }
+                        console.error(error);
+                    }
+            );
+        } else {
+            alert("이 브라우저는 위치 정보를 지원하지 않습니다.");
+        }
+    });
+    const unableStart= "url('/images/unable_start.png')";
+    const unableStop = "url('/images/unable_stop.png')";
+    const Start= "url('/images/recording_start.jpg')";
+    const Stop = "url('/images/recording_stop.jpg')";
+    startBtn.addEventListener("click", async () => {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        startBtn.style.backgroundImage = unableStart;
+        stopBtn.style.backgroundImage = Stop;
+        mediaRecorder.ondataavailable = (event) => {
+            audioChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = async () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+            const audioFile = new File([audioBlob], "recording.mp3", { type: "audio/mp3" });
+
+            // 위도, 경도 값 가져오기
+            const lat = latitudeInput.value;
+            const lon = longitudeInput.value;
+
+            if (!lat || !lon) {
+                alert("위도와 경도를 입력하세요.");
+                return;
+            }
+
+            // DataTransfer 객체를 사용하여 파일을 동적으로 추가
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(audioFile); // 녹음 파일을 추가
+            audioFileInput.files = dataTransfer.files; // input의 files 속성에 추가된 파일 설정
+
+            // 음성 파일이 추가된 것을 표시
+            audioFileLabel.style.display = "block";
+
+            // 초기화
+            audioChunks = [];
+        };
+
+        mediaRecorder.start();
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+    });
+
+    stopBtn.addEventListener("click", () => {
+        mediaRecorder.stop();
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        startBtn.style.backgroundImage = Start;
+        stopBtn.style.backgroundImage = unableStop;
+    });
+</script>
+{{>layouts/footer}}

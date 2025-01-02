@@ -1,0 +1,270 @@
+{{>layouts/header}}
+<div id="back_ground">
+    <style>
+        #back_ground {
+            display: block;
+        }
+
+        form {
+            display: flex;
+            justify-content: center;
+        }
+
+        #searchForm {
+            background: #ffffff;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+          }
+
+          .form-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+          }
+
+          #searchForm label {
+            font-weight: bold;
+            color: #333333;
+            margin-top:8px;
+          }
+
+          #searchForm input[type="datetime-local"],
+          #searchForm select {
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            flex: 1;
+          }
+
+          #searchForm select {
+            appearance: none;
+            background: #fff url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23333" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>') no-repeat right 10px center;
+            background-size: 12px;
+          }
+
+          .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+          }
+
+          #searchForm button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            color: #ffffff;
+          }
+
+          #searchForm button[type="button"] {
+            background-color: #f44336;
+          }
+
+          #searchForm button[type="submit"] {
+            background-color: #4CAF50;
+          }
+
+          #searchForm button:hover {
+            opacity: 0.9;
+          }
+
+          .btn-container {
+            display: flex;
+            justify-content: center;
+          }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 16px;
+            text-align: left;
+        }
+
+        thead tr {
+            background-color: #009879;
+            color: #ffffff;
+            text-align: center;
+            font-size: small;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            border: 1px solid #dddddd;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #dddddd;
+            font-size: small;
+            background-color: #f3f3f3;
+        }
+
+        tbody tr:last-of-type {
+            border-bottom: 2px solid #009879;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #ff0000;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .pagination {
+            margin-top: 20px;
+        }
+
+        .hospital-card {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        #chart {
+            background-color: #4CAF50; /* 초록색 배경 */
+            color: white; /* 글자색 흰색 */
+            font-size: 16px; /* 글자 크기 */
+            padding: 12px 20px; /* 상하좌우 여백 */
+            border-radius: 6px; /* 둥근 모서리 */
+            border: none; /* 테두리 없애기 */
+            cursor: pointer; /* 클릭 커서 */
+            transition: background-color 0.3s ease, transform 0.2s ease; /* 배경색 변화 및 애니메이션 */
+        }
+
+        #chart {
+            background-color: #45a049; /* 마우스 오버 시 더 어두운 초록색 */
+            transform: scale(1.05); /* 살짝 확대 효과 */
+        }
+
+        #chart {
+            outline: none; /* 포커스 시 테두리 제거 */
+            box-shadow: 0 0 10px rgba(72, 183, 78, 0.7); /* 초록색 그림자 */
+        }
+    </style>
+
+    <form method="get" action="/admin" id="searchForm">
+        <label for="startDate">Start Date:</label>
+        <input type="datetime-local" id="startDate" name="startDate" value="{{startDate}}">
+
+        <label for="endDate">End Date:</label>
+        <input type="datetime-local" id="endDate" name="endDate" value="{{endDate}}">
+
+        <label for="emClass">등급</label>
+        <select id="emClass" name="emClass">
+            {{#emClass}}<option value="" hidden>{{emClass}}</option>{{/emClass}}
+            <option value="" {{^emClass}}selected{{/emClass}}>-- 선택 --</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+
+        <button type="button" onclick="resetForm()">Reset</button>
+        <button type="submit">Search</button>
+        <a href="/admin/chart-data">
+            <button type="button" style="background-color: #0d6efd;">Chart</button>
+        </a>
+    </form>
+
+    <table>
+        <thead>
+        <tr>
+            <td>날짜</td>
+            <td>요청 문구</td>
+            <td>위도</td>
+            <td>경도</td>
+            <td>등급</td>
+            <td>병원 1</td>
+            <td>병원 2</td>
+            <td>병원 3</td>
+        </tr>
+        </thead>
+        <tbody>
+        {{#logs}}
+            <tr>
+                <td>{{datetime}}</td>
+                <td>{{input_text}}</td>
+                <td>{{input_latitude}}</td>
+                <td>{{input_longitude}}</td>
+                <td>{{em_class}} 등급</td>
+                <td>{{#hospital1.hospital}}<a href="#" onclick="showHospitalCard('{{hospital1.addr}}', '{{hospital1.tel}}', '{{hospital1.eta}}', {{hospital1.dist}}, {{hospital1.fee}})">{{hospital1.hospital}}{{/hospital1.hospital}}</a>{{^hospital1.hospital}}-{{/hospital1.hospital}}</td>
+                <td>{{#hospital2.hospital}}<a href="#" onclick="showHospitalCard('{{hospital2.addr}}', '{{hospital2.tel}}', '{{hospital2.eta}}', {{hospital2.dist}}, {{hospital2.fee}})">{{hospital2.hospital}}{{/hospital2.hospital}}</a>{{^hospital2.hospital}}-{{/hospital2.hospital}}</td>
+                <td>{{#hospital3.hospital}}<a href="#" onclick="showHospitalCard('{{hospital3.addr}}', '{{hospital3.tel}}', '{{hospital3.eta}}', {{hospital3.dist}}, {{hospital3.fee}})">{{hospital3.hospital}}{{/hospital3.hospital}}</a>{{^hospital3.hospital}}-{{/hospital3.hospital}}</td>
+            </tr>
+        {{/logs}}
+        </tbody>
+    </table>
+
+    <div id="hospitalCard" class="hospital-card">
+        <p><strong>주소:</strong> <span id="cardAddr"></span></p>
+        <p><strong>전화번호:</strong> <span id="cardTel"></span></p>
+        <p><span class="eta">예상 도착 시간:</span> <span id="cardEta"></span></p>
+        <p><span class="distance">거리:</span> <span id="cardDist"></span> km</p>
+        <p><strong>예상 요금:</strong> <span id="cardFee"></span>원</p>
+    </div>
+
+    {{^logs}}
+        <div class="no-results">
+            데이터가 존재하지 않습니다.
+        </div>
+    {{/logs}}
+
+    <!-- 페이지네이션 코드 -->
+    <div class="pagination-container">
+        <ul class="pagination justify-content-center">
+            <li class="page-item {{^hasPrev}}disabled{{/hasPrev}}">
+                <a class="page-link" href="?page={{prev}}&startDate={{startDate}}&endDate={{endDate}}{{#emClass}}&emClass={{emClass}}{{/emClass}}"
+                tabindex="-1" aria-disabled="true">
+                Previous
+                </a>
+            </li>
+            {{#pageNumbers}}
+                <li class="page-item {{#isCurrentPage}}active{{/isCurrentPage}}">
+                    <a class="page-link" href="?page={{number}}&startDate={{startDate}}&endDate={{endDate}}{{#emClass}}&emClass={{emClass}}{{/emClass}}">{{number}}</a>
+                </li>
+            {{/pageNumbers}}
+            <li class="page-item {{^hasNext}}disabled{{/hasNext}}">
+                <a class="page-link" href="?page={{next}}&startDate={{startDate}}&endDate={{endDate}}{{#emClass}}&emClass={{emClass}}{{/emClass}}"
+                tabindex="-1" aria-disabled="true">
+                Next
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    function showHospitalCard(addr, tel, eta, dist, fee) {
+      document.getElementById("cardAddr").textContent = addr || "-";
+      document.getElementById("cardTel").textContent = tel || "-";
+      document.getElementById("cardEta").textContent = eta || "-";
+      document.getElementById("cardDist").textContent = dist || "-";
+      document.getElementById("cardFee").textContent = fee || "-";
+  }
+
+  function hideHospitalCard() {
+    document.getElementById("hospitalCard").classList.remove("show");
+    document.getElementById("overlay").classList.remove("show");
+  }
+
+    function resetForm() {
+        const form = document.getElementById('searchForm');
+        form.reset();
+        document.getElementById('startDate').value = "";
+        document.getElementById('endDate').value = "";
+        document.getElementById('emClass').selectedIndex = "";
+    }
+</script>
+{{>layouts/footer}}

@@ -1,0 +1,199 @@
+<style>
+    #back_ground {
+        min-height: 100vh;
+        padding: 10px 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 1200px;
+        padding: 10px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .btn-container {
+        position: sticky;
+        top: 10px;
+        z-index: 100;
+        margin-bottom: 15px; /* 폼과의 간격 조정 */
+        width: 100%;
+        display: flex;
+    }
+
+    .btn-primary {
+        width: 120px !important;
+        height: 40px !important;
+        flex-shrink: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 !important; /* 기존 마진 제거 */
+    }
+
+    /* 큰 화면에서는 왼쪽 정렬 */
+    @media screen and (min-width: 769px) {
+        .btn-container {
+            justify-content: flex-start;
+        }
+    }
+
+    /* 작은 화면에서는 가운데 정렬 */
+    @media screen and (max-width: 768px) {
+        .btn-container {
+            justify-content: center;
+        }
+    }
+
+    .scrollable-div {
+        flex: 1;
+        overflow-y: auto;
+        height: calc(100vh - 80px); /* 버튼 높이(40px) + 여백(40px) 제외 */
+    }
+
+    .hospital-card {
+        padding: 15px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: white;
+    }
+
+    .hospital-card:hover {
+        background-color: #f0f8ff;
+    }
+
+    /* 높이가 작을 때의 반응형 처리 */
+    @media screen and (max-height: 500px) {
+        .scrollable-div {
+            height: calc(100vh - 60px); /* 여백 더 줄임 */
+        }
+
+        .hospital-card {
+            padding: 10px;
+            margin-bottom: 8px;
+        }
+
+        .hospital-card h2 {
+            font-size: 1.1em;
+            margin: 0 0 8px 0;
+        }
+
+        .hospital-card p {
+            margin: 4px 0;
+            font-size: 0.9em;
+        }
+    }
+
+    /* 큰 화면에서는 왼쪽 정렬 */
+    @media screen and (min-width: 769px) {
+        .btn-container {
+            justify-content: flex-start;
+        }
+    }
+
+    /* 작은 화면에서는 가운데 정렬 */
+    @media screen and (max-width: 768px) {
+        .btn-container {
+            justify-content: center;
+        }
+    }
+</style>
+{{>layouts/header}}
+<div id="back_ground">
+    <div class="container">
+        <div class="btn-container" style="margin-top: 6%">
+            <a href="/" class="btn btn-primary" style="color: white;">다시 탐색</a>
+            {{#class}}
+                <div
+                        class="rank-image"
+                        style="margin-left: auto; height: 60px; width: 60px; background-image: url('/images/rank{{class}}.png'); background-size: contain; background-repeat: no-repeat; background-position: center;"
+                >
+                </div>
+            {{/class}}
+        </div>
+
+        <div class="scrollable-div">
+            {{^emergency}}
+                {{#data0}}
+                    <form id="hospitalForm0" action="/em/info/detail" method="POST">
+                        <input id="a1" type="hidden" name="hospital" value="{{hospital}}">
+                        <input id="a2" type="hidden" name="addr" value="{{addr}}">
+                        <input id="a3" type="hidden" name="tel" value="{{tel}}">
+                        <input id="a4" type="hidden" name="eta" value="{{eta}}">
+                        <input id="a5" type="hidden" name="dist" value="{{dist}}">
+                        <input id="a6" type="hidden" name="fee" value="{{fee}}">
+                        <input type="hidden" name="path" value="{{path}}">
+                    </form>
+                        <div class="hospital-card" onclick="submitForm0()">
+                            <h2>{{hospital}}</h2>
+                            <p><strong>주소:</strong> {{addr}}</p>
+                            <p><span class="eta">예상 도착 시간:</span> {{eta}}</p>
+                            <p><span class="distance">거리:</span> {{dist}} km</p>
+                        </div>
+
+                {{/data0}}
+                {{#data1}}
+                    <form id="hospitalForm1" action="/em/info/detail" method="POST">
+                        <input id="b1" type="hidden" name="hospital" value="{{hospital}}">
+                        <input id="b2" type="hidden" name="addr" value="{{addr}}">
+                        <input id="b3" type="hidden" name="tel" value="{{tel}}">
+                        <input id="b4" type="hidden" name="eta" value="{{eta}}">
+                        <input id="b5" type="hidden" name="dist" value="{{dist}}">
+                        <input id="b6" type="hidden" name="fee" value="{{fee}}">
+                        <input type="hidden" name="path" value="{{path}}">
+                    </form>
+                    <div class="hospital-card" onclick="submitForm1()">
+                        <h2>{{hospital}}</h2>
+                        <p><strong>주소:</strong> {{addr}}</p>
+                        <p><span class="eta">예상 도착 시간:</span> {{eta}}</p>
+                        <p><span class="distance">거리:</span> {{dist}} km</p>
+                    </div>
+
+                {{/data1}}
+                {{#data2}}
+                    <form id="hospitalForm2" action="/em/info/detail" method="POST">
+                        <input id="c1" type="hidden" name="hospital" value="{{hospital}}">
+                        <input id="c2" type="hidden" name="addr" value="{{addr}}">
+                        <input id="c3" type="hidden" name="tel" value="{{tel}}">
+                        <input id="c4" type="hidden" name="eta" value="{{eta}}">
+                        <input id="c5" type="hidden" name="dist" value="{{dist}}">
+                        <input id="c6" type="hidden" name="fee" value="{{fee}}">
+                        <input type="hidden" name="path" value="{{path}}">
+                    </form>
+                    <div class="hospital-card" onclick="submitForm2()">
+                        <h2>{{hospital}}</h2>
+                        <p><strong>주소:</strong> {{addr}}</p>
+                        <p><span class="eta">예상 도착 시간:</span> {{eta}}</p>
+                        <p><span class="distance">거리:</span> {{dist}} km</p>
+                    </div>
+
+                {{/data2}}
+            {{/emergency}}
+            {{#emergency}}
+                <div class="no-results">
+                    위급 상황이 아닌 것으로 판단됩니다. <br>
+                    가까운 병원을 찾아가는 것을 추천드립니다.
+                </div>
+            {{/emergency}}
+        </div>
+    </div>
+</div>
+
+<script>
+    function submitForm0() {
+        document.getElementById("hospitalForm0").submit(); // 폼 제출
+    }
+    function submitForm1() {
+        document.getElementById("hospitalForm1").submit(); // 폼 제출
+    }
+    function submitForm2() {
+        document.getElementById("hospitalForm2").submit(); // 폼 제출
+    }
+</script>
+
+{{>layouts/footer}}
